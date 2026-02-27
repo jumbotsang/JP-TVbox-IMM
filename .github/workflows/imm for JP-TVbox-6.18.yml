@@ -1,11 +1,11 @@
-name: Build imm for JP-TVbox-6.12
+name: Build imm for JP-TVbox-6.18
 
 on:
   workflow_dispatch:
 
 env:
   REPO_URL: https://github.com/immortalwrt/immortalwrt
-  REPO_BRANCH: v24.10.4
+  REPO_BRANCH: v24.10.5
   CONFIG_FILE: JP-TVbox/.config
   DIY_SH: JP-TVbox/diy.sh
   FILES: JP-TVbox/files
