@@ -4,6 +4,8 @@ on:
   workflow_dispatch:
 
 env:
+  env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
   REPO_URL: https://github.com/immortalwrt/immortalwrt
   REPO_BRANCH: v24.10.5
   CONFIG_FILE: JP-TVbox/.config
