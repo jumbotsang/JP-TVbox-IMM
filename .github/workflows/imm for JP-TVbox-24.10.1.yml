@@ -4,7 +4,6 @@ on:
   workflow_dispatch:
 
 env:
-  env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
   REPO_URL: https://github.com/immortalwrt/immortalwrt
   REPO_BRANCH: v24.10.5
@@ -95,7 +94,14 @@ jobs:
       run: |
         [ -e $FILES ] && mv $FILES openwrt/files
         [ -e $CONFIG_FILE ] && mv $CONFIG_FILE openwrt/.config
-
+    
+    - name: Disable Rust
+      run: |
+        sed -i '/CONFIG_PACKAGE_rust/d' openwrt/.config
+        echo "# CONFIG_PACKAGE_rust is not set" >> openwrt/.config
+        cd openwrt
+        make defconfig
+        
     - name: Download package
       working-directory: ./openwrt
       run: |
@@ -109,7 +115,6 @@ jobs:
         chmod -R 755 openwrt
         cd openwrt
         # ✅ 修复 Rust LLVM 下载问题
-        echo -e "[llvm]\ndownload-ci-llvm = false" > config.toml
         export CCACHE_DIR=$HOME/.ccache
         export CC="ccache gcc"
         export CXX="ccache g++"
