@@ -122,7 +122,7 @@ jobs:
 
     - name: Package armsr as openwrt
       if: ${{ env.compile_status == 'success' && !cancelled() }}
-      uses: unifreq/openwrt_packit@v0.7
+      uses: unifreq/openwrt_packit@master
       env:
         OPENWRT_ARMVIRT: openwrt/bin/targets/*/*/*.tar.gz
         KERNEL_REPO_URL: ophub/kernel
