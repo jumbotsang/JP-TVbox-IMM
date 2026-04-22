@@ -1,4 +1,4 @@
-name: Build imm for JP-TVbox-24.10
+name: Build imm for JP-TVbox-24.10.4
 
 on:
   workflow_dispatch:
@@ -6,7 +6,7 @@ on:
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
   REPO_URL: https://github.com/immortalwrt/immortalwrt
-  REPO_BRANCH: v24.10.5
+  REPO_BRANCH: v24.10.4
   CONFIG_FILE: JP-TVbox/.config
   DIY_SH: JP-TVbox/diy.sh
   FILES: JP-TVbox/files
