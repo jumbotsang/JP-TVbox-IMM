@@ -121,7 +121,6 @@ jobs:
         KERNEL_VERSION_NAME: 6.6.80
         KERNEL_AUTO_LATEST: ture
         PACKAGE_SOC: diy
-        GZIP_IMGS: .xz
         SCRIPT_DIY_PATH: JP-TVbox/mk_rk3566_jp-tvbox.sh
         WHOAMI: Jumbotsang
         SW_FLOWOFFLOAD: 0
