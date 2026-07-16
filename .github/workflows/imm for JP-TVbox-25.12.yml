@@ -92,8 +92,8 @@ jobs:
       env:
         OPENWRT_ARMVIRT: openwrt/bin/targets/*/*/*.tar.gz
         KERNEL_REPO_URL: ophub/kernel
-        KERNEL_VERSION_NAME: 6.18.36
-        KERNEL_AUTO_LATEST: true
+        KERNEL_VERSION_NAME: 6.18.37
+        KERNEL_AUTO_LATEST: no
         PACKAGE_SOC: diy
         SCRIPT_DIY_PATH: JP-TVbox/mk_rk3566_jp-tvbox.sh
         WHOAMI: Jumbotsang
