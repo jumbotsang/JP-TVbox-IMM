@@ -85,25 +85,20 @@ jobs:
         echo -e "$(nproc) thread compile"
         make -j$(nproc) || make -j1 || make -j1 V=s
         echo "compile_status=success" >> $GITHUB_ENV
-
-    - name: Show action source
-      run: |
-        git clone --depth=1 https://github.com/ophub/amlogic-s9xxx-openwrt.git ophub-src
-        echo "===== Search cp --update ====="
-        grep -RIn "cp .*--update" ophub-src || true
-        echo "===== Search --update= ====="
-        grep -RIn -- "--update=" ophub-src || true
     
     - name: Package armsr as openwrt
-      uses: ophub/amlogic-s9xxx-openwrt@main
-      with:
-        openwrt_path: openwrt/bin/targets/armsr/armv8/*rootfs.tar.gz
-        openwrt_board: jp-tvbox
-        kernel_repo: ophub/kernel
-        kernel_usage: flippy
-        openwrt_kernel: 6.18.y
-        auto_kernel: true
-        builder_name: Jumbotsang
+      if: ${{ env.compile_status == 'success' && !cancelled() }}
+      uses: unifreq/openwrt_packit@master
+      env:
+        OPENWRT_ARMVIRT: openwrt/bin/targets/*/*/*.tar.gz
+        KERNEL_REPO_URL: ophub/kernel
+        KERNEL_VERSION_NAME: 6.18.36
+        KERNEL_AUTO_LATEST: true
+        PACKAGE_SOC: diy
+        SCRIPT_DIY_PATH: JP-TVbox/mk_rk3566_jp-tvbox.sh
+        WHOAMI: Jumbotsang
+        SW_FLOWOFFLOAD: 0
+        SFE_FLOW: 0
 
     - name: Upload firmware to release
       uses: softprops/action-gh-release@v2.1.0
