@@ -85,6 +85,14 @@ jobs:
         echo -e "$(nproc) thread compile"
         make -j$(nproc) || make -j1 || make -j1 V=s
         echo "compile_status=success" >> $GITHUB_ENV
+
+    - name: Show action source
+      run: |
+        git clone --depth=1 https://github.com/ophub/amlogic-s9xxx-openwrt.git ophub-src
+        echo "===== Search cp --update ====="
+        grep -RIn "cp .*--update" ophub-src || true
+        echo "===== Search --update= ====="
+        grep -RIn -- "--update=" ophub-src || true
     
     - name: Package armsr as openwrt
       uses: ophub/amlogic-s9xxx-openwrt@main
