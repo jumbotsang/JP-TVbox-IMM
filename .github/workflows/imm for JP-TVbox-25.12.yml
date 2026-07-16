@@ -86,18 +86,15 @@ jobs:
         make -j$(nproc) || make -j1 || make -j1 V=s
         echo "compile_status=success" >> $GITHUB_ENV
     
-    - name: Package armsr as openwrt
+    - name: Package armsr
       uses: ophub/amlogic-s9xxx-openwrt@main
       with:
         openwrt_path: openwrt/bin/targets/armsr/armv8/*rootfs.tar.gz
         openwrt_board: jp-tvbox
         kernel_repo: ophub/kernel
         kernel_usage: flippy
-        openwrt_kernel: 6.18.36
-        kernel_auto_latest: true
+        openwrt_kernel: 6.18.38
         builder_name: Jumbotsang
-        SW_FLOWOFFLOAD: 0
-        SFE_FLOW: 0
 
     - name: Upload firmware to release
       uses: softprops/action-gh-release@v2.1.0
