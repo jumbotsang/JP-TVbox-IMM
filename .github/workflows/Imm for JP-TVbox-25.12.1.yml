@@ -79,8 +79,8 @@ jobs:
         openwrt_path: openwrt/bin/targets/armsr/armv8/*rootfs.tar.gz
         openwrt_board: rk3566
         kernel_repo: ophub/kernel
-        kernel_usage: ophub
-        openwrt_kernel: 6.18.38
+        kernel_usage: flippy
+        openwrt_kernel: 6.18.y
         builder_name: Jumbotsang
 
     - name: Upload firmware to release
