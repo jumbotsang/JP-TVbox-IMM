@@ -1,4 +1,4 @@
-name: Build imm for JP-TVbox-6.6
+name: Build imm for JP-TVbox-25.12.2
 
 on:
   workflow_dispatch:
