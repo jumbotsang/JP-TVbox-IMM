@@ -2,150 +2,106 @@ name: Build imm for JP-TVbox-25.12.2
 
 on:
   workflow_dispatch:
+   inputs:
+      ssh:
+        description: 'SSH connection to Actions'
+        required: true
+        default: 'false'
+        type: choice
+        options:
+          - true
+          - false
 
 env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   REPO_URL: https://github.com/immortalwrt/immortalwrt
-  REPO_BRANCH: openwrt-24.10
-  CONFIG_FILE: JP-TVbox/.config
-  DIY_SH: JP-TVbox/diy.sh
-  FILES: JP-TVbox/files
+  REPO_BRANCH: v25.12.2
   TZ: Asia/Shanghai
 
 jobs:
   build:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
 
     steps:
-    - name: 检查服务器配置
-      run: |
-        echo "⚠️ 警告：编译插件需谨慎选择，注意CPU性能"
-        echo "推荐避免选择Node.js相关插件"
-        echo "--------------------------CPU信息--------------------------"
-        echo "CPU物理数量:$(cat /proc/cpuinfo| grep "physical id"| sort| uniq| wc -l)"
-        echo "CPU核心信息：$(cat /proc/cpuinfo | grep name | cut -f2 -d: | uniq -c)"
-        echo "--------------------------内存信息--------------------------"
-        sudo lshw -short -C memory | grep GiB
-        echo "--------------------------硬盘信息--------------------------"
-        echo "硬盘数量：$(ls /dev/sd* | grep -v [1-9] | wc -l)"
-        df -Th
-
-    - name: 清理系统空间
-      run: |
-        sudo rm -rf /usr/share/dotnet
-        sudo rm -rf /usr/local/lib/android
-        sudo rm -rf /opt/ghc
-        sudo rm -rf "/usr/local/share/boost"
-        sudo rm -rf "$AGENT_TOOLSDIRECTORY"
-        sudo apt-get clean
-        sudo apt-get autoremove -y
-        docker system prune -af
-        
-    - name: 最大化构建空间
-      uses: easimon/maximize-build-space@master
-      with: 
-        root-reserve-mb: 10240
-        swap-size-mb: 1
-        remove-dotnet: 'true'
-        remove-android: 'true'
-        remove-haskell: 'true'
-        remove-docker-images: 'true'
-
-    - name: 检查磁盘空间
-      run: df -hT
-        
-    - name: 检出代码
+    - name: Checkout
       uses: actions/checkout@main
-      
-    - name: 初始化环境
+
+    - name: Initialize environment
       env:
         DEBIAN_FRONTEND: noninteractive
-      run: | 
-        sudo -E apt-get -qq update -y
-        sudo -E apt-get -qq install -y ack antlr3 asciidoc autoconf automake autopoint binutils bison build-essential \
-        bzip2 ccache cmake cpio curl device-tree-compiler fastjar flex gawk gettext gcc-multilib g++-multilib \
-        git gperf haveged help2man intltool libc6-dev-i386 libelf-dev libglib2.0-dev libgmp3-dev libltdl-dev \
-        libmpc-dev libmpfr-dev libncurses5-dev libncursesw5-dev libreadline-dev libssl-dev libtool lrzsz \
-        mkisofs msmtp nano ninja-build p7zip p7zip-full patch pkgconf python2.7 python3 python3-pyelftools \
-        libpython3-dev qemu-utils rsync scons squashfs-tools subversion swig texinfo uglifyjs upx-ucl unzip \
-        vim wget xmlto xxd zlib1g-dev
-        sudo -E apt-get -qq autoremove --purge
-        sudo -E apt-get -qq clean
+      run: |
+        sudo -E apt-get -qq update > /dev/null
+        sudo -E apt-get -qq install -y $(curl -fsSL https://raw.githubusercontent.com/nantayo/My-Pkg/master/openwrt) > /dev/null
+        sudo -E apt-get -qq autoremove --purge > /dev/null
+        sudo -E apt-get -qq clean > /dev/null
         sudo timedatectl set-timezone "$TZ"
-        sudo chown $USER:$GROUPS $GITHUB_WORKSPACE
-        
-    - name: 克隆源代码
-      working-directory: ./
-      run: |
-        git clone $REPO_URL -b $REPO_BRANCH openwrt --depth=1
-        
-    - name: 缓存编译
-      uses: stupidloud/cachewrtbuild@main
-      with:
-        ccache: 'true'
-        mixkey: JP-TVbox-${{ env.REPO_BRANCH }}
-        prefix: ${{ github.workspace }}/openwrt
-        
-    - name: 更新并安装feeds
-      working-directory: ./openwrt
-      run: |
-        ./scripts/feeds update -a -f
-        ./scripts/feeds install -a -f
-        
-    - name: 加载自定义配置
-      run: |
-        [ -e $FILES ] && mv $FILES openwrt/files
-        [ -e $CONFIG_FILE ] && mv $CONFIG_FILE openwrt/.config
-        chmod +x $DIY_SH
-        cd openwrt
-        $GITHUB_WORKSPACE/$DIY_SH
+        sudo mkdir -p /workdir
+        sudo chown $USER:$GROUPS /workdir
 
-    - name: 下载软件包
+    - name: Clone source code
+      working-directory: /workdir
+      run: |
+        git clone $REPO_URL -b $REPO_BRANCH --single-branch --depth=1 openwrt
+        ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
+        echo "FILE_DATE=$(date +"%Y%m%d")" >> $GITHUB_ENV
+
+    - name: Update & Install feeds
+      run: |
+        chmod +x JP-TVbox/diy.sh
+        cd openwrt
+        ./scripts/feeds update -a
+        $GITHUB_WORKSPACE/armsr/armv8/diy/diy.sh
+        ./scripts/feeds update -a
+        ./scripts/feeds install -a
+
+    - name: Load N1 custom config
+      run: |
+        rm -rf openwrt/files openwrt/.config
+        mv armsr/armv8/N1/files armsr/armv8/N1/.config openwrt/
+
+    - name: SSH connect to Actions
+      uses: P3TERX/ssh2actions@main
+      if: github.event.inputs.ssh == 'true'
+
+    - name: Download package
       working-directory: ./openwrt
       run: |
         make defconfig
-        make download -j$(nproc)
-        find dl -size -1024c -exec rm -f {} \;
-        
-    - name: 编译固件
-      run: |
-        cd openwrt
-        make -j$(nproc) || make -j$((`nproc`/2)) || make -j1 V=s
-        echo "compile_status=success" >> $GITHUB_ENV
-        
-    - name: 打包OpenWrt固件
-      if: ${{ env.compile_status }} == 'success' && !cancelled()
-      uses: unifreq/openwrt_packit@master
-      env:
-        OPENWRT_ARMVIRT: openwrt/bin/targets/*/*/*.tar.gz
-        KERNEL_REPO_URL: breakingbadboy/OpenWrt
-        KERNEL_VERSION_NAME: 6.6.80
-        KERNEL_AUTO_LATEST: ture
-        PACKAGE_SOC: diy
-        SCRIPT_DIY_PATH: JP-TVbox/mk_rk3566_jp-tvbox.sh
-        WHOAMI: Jumbotsang
-        SW_FLOWOFFLOAD: 0
-        SFE_FLOW: 0
+        make download -j$(( $(nproc) * 2 ))
+        find dl -size -1k -exec rm -f {} \;
 
-    - name: 上传固件到Release
-      uses: ncipollo/release-action@main
-      if: ${{ env.PACKAGED_STATUS == 'success' }} && !cancelled()
+    - name: Compile N1 firmware
+      run: |
+        chmod -R 755 openwrt
+        cd openwrt
+        echo -e "$(nproc) thread compile"
+        make -j$(( $(nproc) + 1 )) || make -j1 V=s
+
+    - name: Package N1 firmware
+      uses: ophub/amlogic-s9xxx-openwrt@main
       with:
-        tag: immortalwrt_JP-TVbox_${{ env.PACKAGED_OUTPUTDATE }}
-        artifacts: /opt/openwrt_packit/output/*
-        allowUpdates: true
-        token: ${{ secrets.GITHUB_TOKEN }}
+        openwrt_path: openwrt/bin/targets/armsr/armv8/*rootfs.tar.gz
+        openwrt_board: s905d
+        kernel_repo: ophub/kernel
+        kernel_usage: flippy
+        openwrt_kernel: 6.12.y
+        openwrt_size: 256/1024
+        builder_name: nantayo
+
+    - name: Upload firmware to release
+      uses: softprops/action-gh-release@master
+      with:
+        tag_name: OpenWrt_${{ env.FILE_DATE }}
+        files: ${{ env.PACKAGED_OUTPUTPATH }}/*.img.gz
         body: |
-          基于immortalwrt openwrt构建
           首次使用建议全新刷写
           * 基本信息
-          IP: 192.168.50.2
+          IP: 192.168.2.2
           账户: root
           密码: password
-          
-    - name: 删除旧的Release
-      uses: dev-drprasad/delete-older-releases@master
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Delete old releases
+      uses: mgz0227/delete-older-releases@master
       with:
-        keep_latest: 3
+        keep_latest: 2
         delete_tags : true
