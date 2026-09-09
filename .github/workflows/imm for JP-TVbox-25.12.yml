@@ -27,7 +27,7 @@ jobs:
         haskell: true
         large-packages: true
         docker-images: true
-        swap-size-mb: 10240
+        swap-storage: true
 
     - name: Initialize environment
       env:
