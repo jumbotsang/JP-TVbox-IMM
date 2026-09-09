@@ -116,7 +116,7 @@ jobs:
           密码: password
     
     - name: Delete old releases
-      uses: uses: dev-drprasad/delete-older-releases@v0.3.4
+      uses: dev-drprasad/delete-older-releases@v0.3.4
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
