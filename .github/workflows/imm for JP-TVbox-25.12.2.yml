@@ -87,7 +87,7 @@ jobs:
       if: ${{ env.compile_status == 'success' && !cancelled() }}
       uses: unifreq/openwrt_packit@master
       env:
-        OPENWRT_ARMVIRT: openwrt/bin/targets/*/*/*rootfs.tar.gz
+        openwrt_path: openwrt/bin/targets/armsr/armv8/*rootfs.tar.gz
         KERNEL_REPO_URL: ophub/kernel
         KERNEL_VERSION_NAME: 6.18.50
         KERNEL_AUTO_LATEST: true
