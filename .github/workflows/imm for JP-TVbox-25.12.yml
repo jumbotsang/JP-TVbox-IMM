@@ -99,7 +99,7 @@ jobs:
         SFE_FLOW: 0
 
     - name: Upload firmware to release
-      uses: softprops/action-gh-release@v2
+      uses: softprops/action-gh-release@v4
       if: ${{ env.PACKAGED_STATUS == 'success' && !cancelled() }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
