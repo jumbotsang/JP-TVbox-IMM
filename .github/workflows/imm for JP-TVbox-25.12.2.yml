@@ -90,7 +90,7 @@ jobs:
         OPENWRT_ARMSR: openwrt/bin/targets/armsr/armv8/*-armsr-armv8-generic-rootfs.tar.gz
         KERNEL_REPO_URL: ophub/kernel
         KERNEL_VERSION_NAME: 6.18.49
-        KERNEL_AUTO_LATEST: true
+        KERNEL_AUTO_LATEST: false
         PACKAGE_SOC: diy
         SCRIPT_DIY_PATH: JP-TVbox/mk_rk3566_jp-tvbox.sh
         WHOAMI: Jumbotsang
