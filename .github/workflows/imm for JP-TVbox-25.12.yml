@@ -17,7 +17,7 @@ jobs:
 
     steps:
     - name: Checkout
-      uses: actions/checkout@main
+      uses: actions/checkout@4
 
     - name: Free Disk Space
       uses: jlumbroso/free-disk-space@main
@@ -99,7 +99,7 @@ jobs:
         SFE_FLOW: 0
 
     - name: Upload firmware to release
-      uses: softprops/action-gh-release@v4
+      uses: softprops/action-gh-release@v2
       if: ${{ env.PACKAGED_STATUS == 'success' && !cancelled() }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
