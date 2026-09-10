@@ -61,7 +61,35 @@ jobs:
         $GITHUB_WORKSPACE/$DIY_SH
         ./scripts/feeds update -a
         ./scripts/feeds install -a
-    
+        # ==========================================
+        # AdGuardHome persistent work directory
+        # ==========================================
+
+        echo "===== Find AdGuardHome config ====="
+        AGH_CONF=""
+        if [ -f "package/feeds/packages/adguardhome/files/adguardhome.conf" ]; then
+            AGH_CONF="package/feeds/packages/adguardhome/files/adguardhome.conf"
+        elif [ -f "feeds/packages/net/adguardhome/files/adguardhome.conf" ]; then
+            AGH_CONF="feeds/packages/net/adguardhome/files/adguardhome.conf"
+        fi
+        if [ -n "$AGH_CONF" ]; then
+            echo "Found: $AGH_CONF"
+
+            sed -i \
+                -e "s|option work_dir '/var/lib/adguardhome'|option work_dir '/root/AdGuardHome'|g" \
+                -e "s|option workdir '/var/lib/adguardhome'|option workdir '/root/AdGuardHome'|g" \
+                "$AGH_CONF"
+
+            echo "===== AdGuardHome configuration ====="
+            grep -E 'work_dir|workdir' "$AGH_CONF" || true
+        else
+            echo "ERROR: AdGuardHome configuration not found!"
+            exit 1
+        fi
+
+        # Pre-create persistent directory
+        mkdir -p package/base-files/files/root/AdGuardHome
+
     - name: Load custom config
       run: |
         [ -e $FILES ] && mv $FILES openwrt/files
