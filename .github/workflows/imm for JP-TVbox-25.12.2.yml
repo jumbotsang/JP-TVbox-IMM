@@ -94,7 +94,7 @@ jobs:
         PACKAGE_SOC: diy
         SCRIPT_DIY_PATH: JP-TVbox/mk_rk3566_jp-tvbox.sh
         WHOAMI: Jumbotsang
-        SW_FLOWOFFLOAD: 0
+        SW_FLOWOFFLOAD: 1
         SFE_FLOW: 0
 
     - name: Upload firmware to release
