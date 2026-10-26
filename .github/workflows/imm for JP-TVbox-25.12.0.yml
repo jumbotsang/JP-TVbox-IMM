@@ -84,7 +84,7 @@ jobs:
         echo "compile_status=success" >> $GITHUB_ENV
     
     - name: Package armsr as openwrt
-      ophub/amlogic-s9xxx-openwrt@main
+      uses: ophub/amlogic-s9xxx-openwrt@main
       with:
         openwrt_path: openwrt/bin/targets/armsr/armv8/*rootfs.tar.gz
         KERNEL_VERSION_NAME: 6.18.y
