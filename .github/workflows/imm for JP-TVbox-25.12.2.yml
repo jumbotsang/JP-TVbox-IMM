@@ -93,7 +93,6 @@ jobs:
         KERNEL_AUTO_LATEST: true
         PACKAGE_SOC: diy
         SCRIPT_DIY_PATH: JP-TVbox/mk_rk3566_jp-tvbox.sh
-        openwrt_size: 256/2048
         WHOAMI: Jumbotsang
         SW_FLOWOFFLOAD: 1
         SFE_FLOW: 0
