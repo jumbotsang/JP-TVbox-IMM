@@ -121,7 +121,7 @@ WIRELESS_CONFIG="${PWD}/files/rk3566/jp-tvbox/wireless"
 check_depends
 
 SKIP_MB=16
-BOOT_MB=256
+BOOT_MB=512
 ROOTFS_MB=2048
 SIZE=$((SKIP_MB + BOOT_MB + ROOTFS_MB + 1))
 create_image "$TGT_IMG" "$SIZE"
