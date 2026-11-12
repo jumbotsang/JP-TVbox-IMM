@@ -45,13 +45,13 @@ jobs:
         sudo timedatectl set-timezone "$TZ"
         sudo mkdir -p /workdir
         sudo chown $USER:$GROUPS /workdir
-
+    
     - name: Clone source code
       working-directory: /workdir
       run: |
         git clone $REPO_URL -b $REPO_BRANCH --single-branch --depth=1 openwrt
         ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
-
+    
     - name: Update & Install feeds
       run: |
         chmod +x $DIY_SH
@@ -66,7 +66,7 @@ jobs:
       run: |
         [ -e $FILES ] && mv $FILES openwrt/files
         [ -e $CONFIG_FILE ] && mv $CONFIG_FILE openwrt/.config
-
+    
     - name: Download package
       working-directory: ./openwrt
       run: |
@@ -74,7 +74,7 @@ jobs:
         make download -j8
         find dl -size -1024c -exec ls -l {} \;
         find dl -size -1024c -exec rm -f {} \;
-
+    
     - name: Compile the firmware
       run: |
         chmod -R 755 openwrt
@@ -82,22 +82,17 @@ jobs:
         echo -e "$(nproc) thread compile"
         make -j$(nproc) || make -j1 || make -j1 V=s
         echo "compile_status=success" >> $GITHUB_ENV
-
-    - name: Prepare JP-TVbox packaging script
-      run: |
-        sudo git clone --depth=1 https://github.com/unifreq/openwrt_packit /opt/openwrt_packit
-        sudo chown -R "$USER:$USER" /opt/openwrt_packit
-        cp "$GITHUB_WORKSPACE/JP-TVbox/mk_rk3566_jp-tvbox.sh" /opt/openwrt_packit/mk_rk3566_jp-tvbox.sh
-
-    - name: Package JP-TVbox as OpenWrt
+    
+    - name: Package armsr as openwrt
       if: ${{ env.compile_status == 'success' && !cancelled() }}
       uses: unifreq/openwrt_packit@master
       env:
         OPENWRT_ARMSR: openwrt/bin/targets/armsr/armv8/*-armsr-armv8-generic-rootfs.tar.gz
         KERNEL_REPO_URL: ophub/kernel
+        KERNEL_VERSION_NAME: 6.18.y
         KERNEL_AUTO_LATEST: true
-        PACKAGE_SOC: jp-tvbox
-        SCRIPT_JPTVBOX: mk_rk3566_jp-tvbox.sh
+        PACKAGE_SOC: diy
+        SCRIPT_DIY_PATH: JP-TVbox/mk_rk3566_jp-tvbox.sh
         WHOAMI: Jumbotsang
         SW_FLOWOFFLOAD: 1
         SFE_FLOW: 0
@@ -117,7 +112,7 @@ jobs:
           IP: 192.168.50.2
           账户: root
           密码: password
-
+    
     - name: Delete old releases
       uses: dev-drprasad/delete-older-releases@master
       env:
