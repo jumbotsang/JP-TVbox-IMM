@@ -13,10 +13,12 @@ function git_sparse_clone() {
 # Default IP
 sed -i 's/192.168.1.1/192.168.50.2/g' package/base-files/files/bin/config_generate
 
-# Add packages
-git clone --depth 1 https://github.com/jerrykuku/luci-theme-argon package/luci-theme-argon
-git clone --depth 1 https://github.com/ophub/luci-app-amlogic package/amlogic
-git clone --depth=1 https://github.com/nikkinikki-org/OpenWrt-nikki package/luci-app-nikki
-
 rm -rf feeds/luci/themes/luci-theme-argon
 rm -rf feeds/luci/applications/luci-app-argon-config
+rm -rf package/luci-app-amlogic
+
+# Add packages
+git clone --depth 1 https://github.com/jerrykuku/luci-theme-argon package/luci-theme-argon
+git clone --depth=1 https://github.com/nikkinikki-org/OpenWrt-nikki package/luci-app-nikki
+git clone -b main https://github.com/ophub/luci-app-amlogic.git package/luci-app-amlogic
+
